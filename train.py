@@ -43,7 +43,8 @@ args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
 
 ## get data
-adj, features, labels, idx_train, idx_val, idx_test = load_citation(args.data, 'AugNormAdj', True)
+#adj, features, labels, idx_train, idx_val, idx_test = load_citation(args.data, 'AugNormAdj', True)
+adj, features, labels, idx_train, idx_val, idx_test = load_citation(args.data, 'AugNormAdj', args.cuda)
 adj_label = get_A_r(adj, args.order)
 
 
@@ -80,7 +81,10 @@ def get_batch(batch_size):
     """
     get a batch of feature & adjacency matrix
     """
-    rand_indx = torch.tensor(np.random.choice(np.arange(adj_label.shape[0]), batch_size)).type(torch.long).cuda()
+    if args.cuda:
+        rand_indx = torch.tensor(np.random.choice(np.arange(adj_label.shape[0]), batch_size)).type(torch.long).cuda()
+    else:
+        rand_indx = torch.tensor(np.random.choice(np.arange(adj_label.shape[0]), batch_size)).type(torch.long)
     rand_indx[0:len(idx_train)] = idx_train
     features_batch = features[rand_indx]
     adj_label_batch = adj_label[rand_indx,:][:,rand_indx]
